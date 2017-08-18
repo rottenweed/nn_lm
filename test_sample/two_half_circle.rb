@@ -27,14 +27,14 @@ end
 # d: lower half_circle distance
 # return as: [[xp, yp], [xn, yn]]
 def random_dot_pair_half_circle(r, w, d)
-    dot_pos_p = create_dot(w / r);
+    dot_pos_p = create_dot((w * 1.0) / r);
     # upper half
     x_sign = rand();
     dot_pos_p[0] *= -1 if(x_sign < 0.5);
     dot_pos_p[0] *= r;
     dot_pos_p[1] *= r;
     # lower half
-    dot_pos_n = create_dot(0.6);
+    dot_pos_n = create_dot((w * 1.0) / r);
     x_sign = rand();
     dot_pos_n[0] *= -1 if(x_sign < 0.5);
     dot_pos_n[0] += 1;
