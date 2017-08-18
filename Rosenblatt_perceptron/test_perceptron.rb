@@ -16,7 +16,7 @@ print(neuron.to_s, "\n");
 
 right_cnt = 0;
 error_cnt = 0;
-10000.times {|i|
+1000.times {|i|
     dot = random_dot_pair_half_circle(10.0, 6.0, 1.0);
     neuron.xn = dot[0];
     if(neuron.output == 1)
