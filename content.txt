@@ -1,3 +1,4 @@
 1   Rosenblatt Perceptron
     Rosenblatt感知器，基于非线性神经元的McCulloch-Pitts模型
+    当修正因子delta>1.0时，可能发生不稳定的现象。
 
