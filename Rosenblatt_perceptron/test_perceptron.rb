@@ -19,19 +19,19 @@ error_cnt = 0;
 1000.times {|i|
     dot = random_dot_pair_half_circle(10.0, 6.0, 1.0);
     neuron.xn = dot[0];
-    if(neuron.output == 1)
+    if(neuron.act_f == 1)
         right_cnt += 1;
     else
         error_cnt += 1;
     end
     neuron.train(1);
     neuron.xn = dot[1];
-    if(neuron.output == 0)
+    if(neuron.act_f == -1)
         right_cnt += 1;
     else
         error_cnt += 1;
     end
-    neuron.train(0);
+    neuron.train(-1);
     CSV.print("#{neuron.wn[0]},#{neuron.wn[1]},#{neuron.b}\n");
 }
     print("End: ", neuron.to_s, "\n");
@@ -42,13 +42,13 @@ error_cnt = 0;
 2000.times {|i|
     dot = random_dot_pair_half_circle(10.0, 6.0, 1.0);
     neuron.xn = dot[0];
-    if(neuron.output == 1)
+    if(neuron.act_f == 1)
         right_cnt += 1;
     else
         error_cnt += 1;
     end
     neuron.xn = dot[1];
-    if(neuron.output == 0)
+    if(neuron.act_f == -1)
         right_cnt += 1;
     else
         error_cnt += 1;

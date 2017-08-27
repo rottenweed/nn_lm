@@ -6,12 +6,12 @@ class Perceptron
     attr_accessor(:delta);  # ration for step-to-step delta
     attr_accessor(:xn);     # input x1 ~ xn
     attr_accessor(:wn);     # rations for xn
-    attr_accessor(:b);      # offset
+    attr_accessor(:b);      # bias
 
     # Parameters:
     #   n: dimension.
     #   delta: ration for step-to-step delta.
-    #   b: offset.
+    #   b: bias.
     # Object variable:
     #   wn: rations for every input
     def initialize(n = 2, delta = 0.5, b = 0.0)
@@ -24,7 +24,7 @@ class Perceptron
         print(@xn, @wn, "\n");
     end
 
-    # calculation for the inputs and offset
+    # sum calculation for the inputs and bias
     def y()
         val = @b;
         @n.times {|i|
@@ -33,19 +33,19 @@ class Perceptron
         return val;
     end
 
-    # output sign function
-    def output()
-        (y() >= 0) ? 1 : 0;
+    # activation function: signum function
+    def act_f()
+        (y() >= 0) ? 1.0 : -1.0;
     end
 
     # train the neuron
     def train(expect)
-        if((expect == 1) && (output == 0))
+        if((expect == 1) && (act_f == -1))
             @n.times {|i|
                 wn[i] += @delta * xn[i];
             }
             @b += @delta;   # as w0, x0
-        elsif((expect == 0) && (output == 1))
+        elsif((expect == -1) && (act_f == 1))
             @n.times {|i|
                 wn[i] -= @delta * xn[i];
             }
