@@ -26,9 +26,9 @@ class Neuron
 
     # Parameters:
     #   n: count of input.
-    #   xn: input x.
+    #   xn: input x, x1 as 1.0 forever.
     # Object variable:
-    #   wn: rations for every input, w0 as bias.
+    #   wn: rations for every input, w1 as bias.
     def initialize(n = 2)
         @n = n;
         @xn = Array.new(@n, 0.0);
@@ -66,7 +66,6 @@ BEGIN {
 
 require("../test_sample/two_half_circle.rb");
 
-neuron = Neuron.new(3);
 matrix_ration = Matrix[[0.0, 0.0, 0.0],   # x[n] matrix
                        [0.0, 0.0, 0.0],
                        [0.0, 0.0, 0.0]];
@@ -89,7 +88,44 @@ vector_output = Vector[0.0, 0.0, 0.0];
 }
 
 vector_w = matrix_ration.inv * vector_output;
-print("vector_w = ", vector_w, "\n");
+sqrt_wn_sum_sqr = Math.sqrt(vector_w.inject {|sqr, wn| sqr + wn * wn;})
+# normalization of the wn
+if(sqrt_wn_sum_sqr > 1.0e-6)
+    3.times {|i|
+        vector_w[i] /= sqrt_wn_sum_sqr;
+    }
+end
+
+# use the RLS value to set the neuron wn parameter
+neuron = Neuron.new(3);
+neuron.wn = vector_w;
+print(neuron, "\n");
+
+# statistics of the pattern recognition
+right_cnt = 0;
+error_cnt = 0;
+5000.times {|i|
+    dot = random_dot_pair_half_circle(10.0, 6.0, 1.0);
+    # [1, x, y, y_sign] of dot value
+    dot0 = [1.0, dot[0][0], dot[0][1]];     # positive
+    dot1 = [1.0, dot[1][0], dot[1][1]];     # negative
+    neuron.xn = dot0;
+    if(neuron.act_f == 1)
+        right_cnt += 1;
+    else
+        error_cnt += 1;
+    end
+    neuron.xn = dot1;
+    if(neuron.act_f == -1)
+        right_cnt += 1;
+    else
+        error_cnt += 1;
+    end
+}
+    print("Right: #{right_cnt}, Error: #{error_cnt}\n");
+    error_cnt *= 1.0;   # tranfer to Float
+    print("Error proportion = ");
+    print(error_cnt * 100 / (right_cnt + error_cnt), "\%\n");
 
 END {
     print("Program end.\n");

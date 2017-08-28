@@ -55,6 +55,9 @@ error_cnt = 0;
     end
 }
     print("Right: #{right_cnt}, Error: #{error_cnt}\n");
+    error_cnt *= 1.0;   # tranfer to Float
+    print("Error proportion = ");
+    print(error_cnt * 100 / (right_cnt + error_cnt), "\%\n");
 
 
 END {
