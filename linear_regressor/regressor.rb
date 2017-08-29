@@ -71,6 +71,14 @@ matrix_ration = Matrix[[0.0, 0.0, 0.0],   # x[n] matrix
                        [0.0, 0.0, 0.0]];
 vector_output = Vector[0.0, 0.0, 0.0];
 
+# Generate the wn values through statistics.
+# Use regularized least-squares(RLS) solution
+
+# regularization parameter
+Reg_Par = 1.0;
+# prior wn value
+Vector_W_Pr = [0.5, 0.0, 1.0];     # horizontal line
+
 1000.times {|i|
     dot = random_dot_pair_half_circle(10.0, 6.0, 1.0);
     # [1, x, y, y_sign] of dot value
@@ -84,17 +92,25 @@ vector_output = Vector[0.0, 0.0, 0.0];
         }
         vector_output[j] += dot0[j] * 1.0;
         vector_output[j] += dot1[j] * -1.0;
+
+        # prior item
+        matrix_ration[j, j] += Reg_Par;
+        vector_output[j] += Reg_Par * Vector_W_Pr[j];
     }
 }
 
 vector_w = matrix_ration.inv * vector_output;
-sqrt_wn_sum_sqr = Math.sqrt(vector_w.inject {|sqr, wn| sqr + wn * wn;})
+print(vector_w, "\n");
+=begin
+sqrt_wn_sum_sqr = Math.sqrt(vector_w.inject(1.0) {|sqr, wn|
+    sqr + wn * wn;});
 # normalization of the wn
 if(sqrt_wn_sum_sqr > 1.0e-6)
     3.times {|i|
         vector_w[i] /= sqrt_wn_sum_sqr;
     }
 end
+=end
 
 # use the RLS value to set the neuron wn parameter
 neuron = Neuron.new(3);
@@ -107,16 +123,16 @@ error_cnt = 0;
 5000.times {|i|
     dot = random_dot_pair_half_circle(10.0, 6.0, 1.0);
     # [1, x, y, y_sign] of dot value
-    dot0 = [1.0, dot[0][0], dot[0][1]];     # positive
-    dot1 = [1.0, dot[1][0], dot[1][1]];     # negative
+    dot0 = [1.0, dot[0][0], dot[0][1]];     # positive dot
+    dot1 = [1.0, dot[1][0], dot[1][1]];     # negative dot
     neuron.xn = dot0;
-    if(neuron.act_f == 1)
+    if(neuron.act_f == 1.0)
         right_cnt += 1;
     else
         error_cnt += 1;
     end
     neuron.xn = dot1;
-    if(neuron.act_f == -1)
+    if(neuron.act_f == -1.0)
         right_cnt += 1;
     else
         error_cnt += 1;
