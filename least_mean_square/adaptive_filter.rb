@@ -5,6 +5,8 @@
 class Adaptive_Filter
     attr_accessor(:xn);     # input x1 ~ xn
     attr_accessor(:wn);     # rations for xn
+    attr_accessor(:di);     # desired response
+    attr_reader(:e);        # error value
 
     # Parameters:
     #   n:  input dimensionality.
@@ -12,11 +14,13 @@ class Adaptive_Filter
     #   di: desired response (target), input from external system.
     # Object variable:
     #   wn: rations for every input.
+    #   e:  error between di and calculation
     def initialize(n = 2)
         @n = n;
         @xn = Array.new(@n, 0.0);
         @wn = Array.new(@n, 0.0);
-        @di = 0;
+        @di = 0.0;
+        @e = 0.0;
     end
 
     # setup wn value from external
@@ -30,18 +34,13 @@ class Adaptive_Filter
         @n.times {|i|
             val +=  @wn[i] * @xn[i];
         }
+        @e = @di - val;
         return val;
     end
 
     # signum output
     def signum()
         (y() >= 0) ? 1.0 : -1.0;
-    end
-
-    # error between input desired response and sum,
-    # used in feedback loop.
-    def e()
-        di - y();
     end
 
     # virtual feedback method.

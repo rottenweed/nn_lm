@@ -23,3 +23,5 @@ by Simon Haykin
 
 3   Least Mean Square
     带反馈的线性神经元（自适应滤波器）
+    3.1 线性预测，用均匀分布代替了高斯分布
+    eta增大时，收敛加快，但分布方差增大，和ln(eta)近似成正比。
