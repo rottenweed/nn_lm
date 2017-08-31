@@ -44,7 +44,8 @@ class Adaptive_Filter
         di - y();
     end
 
-    # virtual feedback method
+    # virtual feedback method.
+    # This method must be realized by the sub-class
     def feedback()
         raise("Not defined method for feedback!");
     end
