@@ -18,7 +18,7 @@ BEGIN {
 }
 
 Neuron_Cnt = 100;
-Iterate_Cnt = 1000;
+Iterate_Cnt = 5000;
 array_neuron = Array.new(Neuron_Cnt, Predict_Test.new(1));
 avg_wn = 0.0;
 avg_e = 0.0;
@@ -27,8 +27,8 @@ a = 0.99;
 Iterate_Cnt.times {|i|
     Neuron_Cnt.times {|j|
         # use rand() to replace Gausian distribution
-        e = 0.04 * rand() - 0.02;
-        x = (rand() * 0.995 * 2);
+        e = (rand() - 0.5) * 0.02 * 2;
+        x = (rand() - 0.5) * 0.995 * 2;
         y = a * x + e;
         # setup neuron input and target
         array_neuron[j].xn = [x];
