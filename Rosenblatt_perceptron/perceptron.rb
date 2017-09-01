@@ -33,7 +33,7 @@ class Perceptron
         return val;
     end
 
-    # activation function: signum function
+    # activation function: sign function
     def act_f()
         (y() >= 0) ? 1.0 : -1.0;
     end

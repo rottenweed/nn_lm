@@ -4,9 +4,10 @@
 # A linear neuron with feadback
 class Adaptive_Filter
     attr_accessor(:xn);     # input x1 ~ xn
-    attr_accessor(:wn);     # rations for xn
     attr_accessor(:di);     # desired response
+    attr_reader(:wn);       # rations for xn
     attr_reader(:e);        # error value
+    attr_reader(:sign);     # sign of the value
 
     # Parameters:
     #   n:  input dimensionality.
@@ -14,13 +15,17 @@ class Adaptive_Filter
     #   di: desired response (target), input from external system.
     # Object variable:
     #   wn: rations for every input.
+    #   y:  value of linear calculation
     #   e:  error between di and calculation
+    #   sign:   output of sign function
     def initialize(n = 2)
         @n = n;
         @xn = Array.new(@n, 0.0);
         @wn = Array.new(@n, 0.0);
         @di = 0.0;
+        @y = 0.0;
         @e = 0.0;
+        @sign = 1.0;
     end
 
     # setup wn value from external
@@ -29,18 +34,14 @@ class Adaptive_Filter
     end
 
     # sum calculation for the inputs
-    def y()
-        val = 0.0;
+    def cal()
+        @y = 0.0;
         @n.times {|i|
-            val +=  @wn[i] * @xn[i];
+            @y +=  @wn[i] * @xn[i];
         }
-        @e = @di - val;
-        return val;
-    end
-
-    # signum output
-    def signum()
-        (y() >= 0) ? 1.0 : -1.0;
+        @e = @di - @y;
+        @sign = (@y >= 0) ? 1.0 : -1.0;
+        nil;
     end
 
     # virtual feedback method.
