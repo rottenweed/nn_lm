@@ -19,7 +19,11 @@ BEGIN {
 
 Neuron_Cnt = 100;
 Iterate_Cnt = 5000;
-array_neuron = Array.new(Neuron_Cnt, Predict_Test.new(1));
+array_neuron = Array.new();
+Neuron_Cnt.times {|i|
+    array_neuron << Predict_Test.new(1);
+}
+
 avg_wn = 0.0;
 avg_e = 0.0;
 ETA = 0.001;
