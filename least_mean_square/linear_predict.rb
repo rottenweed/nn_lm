@@ -18,7 +18,7 @@ BEGIN {
 }
 
 Neuron_Cnt = 100;
-Iterate_Cnt = 5000;
+Iterate_Cnt = 50000;
 array_neuron = Array.new();
 Neuron_Cnt.times {|i|
     array_neuron << Predict_Test.new(1);
