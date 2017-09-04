@@ -4,14 +4,12 @@
 # v: linear output
 class Neuron
     attr_accessor(:xn);     # input x1 ~ xn
-    attr_accessor(:di);     # desired response
     attr_reader(:wn);       # rations for xn
     attr_reader(:v);        # linear calcualation value
 
     # Parameters:
     #   n:  input dimensionality.
     #   xn: input x, x1 as 1.0 forever.
-    #   di: desired response (target), input from external system.
     # Object variable:
     #   wn: rations for every input.
     #   v:  value of linear calculation
@@ -19,7 +17,6 @@ class Neuron
         @n = n;
         @xn = Array.new(@n, 0.0);
         @wn = Array.new(@n, 0.0);
-        @di = 0.0;
         @v = 0.0;
     end
 
