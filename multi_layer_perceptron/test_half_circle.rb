@@ -36,14 +36,12 @@ end
 
 BEGIN {
     print("Pattern recognition of the dots in two half circle.\n");
-    CSV = File.open("circle.csv", "w");
+    CSV1 = File.open("circle_w.csv", "w");
+    CSV2 = File.open("circle_o.csv", "w");
 }
 
 # count of Layer_In perceptrons
 Layer_In_Count = 20;
-# learning parameter
-Eta1 = 0.01;
-Eta2 = 0.0001;
 
 # initial wn value
 # input layer: includes some perceptrons
@@ -67,34 +65,48 @@ CIRCLE_R = 10.0;
 CIRCLE_WIDTH = 6.0;
 CIRCLE_DIS = -6.5;
 
+# learning parameter
+Eta1 = 0.01;
+Eta2 = 0.001;
+Eta3 = 0.0001;
 # Back Propagation Iteration
-10000.times {|i|
-    dot = random_dot_pair_half_circle(CIRCLE_R, CIRCLE_WIDTH, CIRCLE_DIS);
-    2.times {|k|
-        # [1, x, y, y_sign] of dot value
-        xn = [1.0, dot[k][0], dot[k][1]];      # select a point
-        yn = [1.0];
-        # Forword Calculation
-        layer_in.each_index {|j|
-            layer_in[j].xn = xn;
-            layer_in[j].cal();
-            yn[j + 1] = layer_in[j].sigmoid;
-        }
-        layer_out.xn = yn;
-        layer_out.cal();
-        # Back Propagration
-        real_judge = (k == 0) ? 1.0 : -1.0;
-        # only train for the error samples
-        if(real_judge != layer_out.sign)
-            eta = (i > 5000) ? Eta2 : Eta1;
-            layer_out.feedback(eta, (real_judge - layer_out.sigmoid));
+Stage_Cnt = 200;
+Stage_Size = 1000;
+# adjust the learning parameter dynamically
+error_cnt = Stage_Size;
+Stage_Cnt.times {|stage|
+    eta = (error_cnt < Stage_Size / 100) ? Eta3 :
+        (error_cnt < Stage_Size / 10) ? Eta2 : Eta1;
+    error_cnt = 0;
+    Stage_Size.times {|i|
+        dot = random_dot_pair_half_circle(CIRCLE_R, CIRCLE_WIDTH, CIRCLE_DIS);
+        2.times {|k|
+            # [1, x, y, y_sign] of dot value
+            xn = [1.0, dot[k][0], dot[k][1]];      # select a point
+            yn = [1.0];
+            # Forword Calculation
             layer_in.each_index {|j|
-                layer_in[j].feedback(eta, layer_out.grad * layer_out.wn[j]);
+                layer_in[j].xn = xn;
+                layer_in[j].cal();
+                yn[j + 1] = layer_in[j].sigmoid;
             }
-        end
-        # Output the parameter
-#        CSV.printf("%f\n", layer_out.wn[0]);
+            layer_out.xn = yn;
+            layer_out.cal();
+            # Back Propagration
+            real_judge = (k == 0) ? 1.0 : -1.0;
+            # only train for the error samples
+            if(real_judge != layer_out.sign)
+                layer_out.feedback(eta, (real_judge - layer_out.sigmoid));
+                layer_in.each_index {|j|
+                    layer_in[j].feedback(eta, layer_out.grad * layer_out.wn[j]);
+                }
+                error_cnt += 1;
+            end
+        }
     }
+    # Output the parameter
+    CSV1.printf("%f,%d,%f\n", eta, error_cnt, layer_out.wn[0]);
+    break if(error_cnt == 0);
 }
 
 # show the parameters
@@ -123,7 +135,7 @@ error_cnt = 0;
             right_cnt += 1;
         else
             error_cnt += 1;
-            CSV.printf("%f,%f\n", xn[1], xn[2]);
+            CSV2.printf("%f,%f\n", xn[1], xn[2]);
         end
     }
 }
@@ -132,7 +144,8 @@ print("Error cnt = ", error_cnt, "\n");
 
 END {
     print("Program end.\n");
-    CSV.close();
+    CSV1.close();
+    CSV2.close();
 }
 __END__
 2017.09.04
