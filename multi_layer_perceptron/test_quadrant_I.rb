@@ -74,11 +74,13 @@ Eta1 = 0.01;
 Eta2 = 0.0001;
 
 # initial wn value
+layer_in_wn = [[0.0, 0.0, 0.0],
+               [0.0, 0.0, 0.0]];
 # input layer: includes some perceptrons
-layer_in = [];
+layer_in = Array.new();
 Layer_In_Count.times {|i|
     layer_in << Perceptron.new(3);
-    layer_in[i].set_w([0, rand() - 0.5, rand() - 0.5]);
+    layer_in[i].set_w(layer_in_wn[i]);
 }
 # output layer: 1 perceptron
 layer_out = Perceptron.new(Layer_In_Count + 1);
@@ -90,7 +92,7 @@ layer_out.set_w(layer_out_init_wn);
 print(layer_out_init_wn, "\n");
 
 # Back Propagation Iteration
-10000.times {|i|
+20000.times {|i|
     x = 2.0 * (rand() - 0.5);
     y = 2.0 * (rand() - 0.5);
     xn = [1.0, x, y];
@@ -105,7 +107,7 @@ print(layer_out_init_wn, "\n");
     layer_out.cal();
     # Back Propagration
     real_judge = ((x >=0) && (y >= 0)) ? 1.0 : -1.0;
-    eta = (i > 5000) ? Eta2 : Eta1;
+    eta = (i > 10000) ? Eta2 : Eta1;
     layer_out.feedback(eta, (real_judge - layer_out.sigmoid));
     layer_in.each_index {|j|
         layer_in[j].feedback(eta, layer_out.grad * layer_out.wn[j]);
@@ -125,6 +127,12 @@ layer_out.set_w([-1.5, 1.0, 1.0]);
 =end
 
 # check the recognition
+# show the parameters
+layer_in.each {|neuron|
+    print(neuron.wn, "\n");
+}
+print(layer_out.wn, "\n");
+
 right_cnt = 0;
 error_cnt = 0;
 1000.times {|i|
