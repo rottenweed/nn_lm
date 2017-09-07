@@ -78,6 +78,7 @@ Stage_Cnt.times {|stage|
     eta = (error_cnt < Stage_Size / 100) ? Eta3 :
         (error_cnt < Stage_Size / 10) ? Eta2 : Eta1;
     error_cnt = 0;
+    sum_error = 0.0;
     Stage_Size.times {|i|
         dot = random_dot_pair_half_circle(CIRCLE_R, CIRCLE_WIDTH, CIRCLE_DIS);
         2.times {|k|
@@ -94,9 +95,11 @@ Stage_Cnt.times {|stage|
             layer_out.cal();
             # Back Propagration
             real_judge = (k == 0) ? 1.0 : -1.0;
+            cur_error = real_judge - layer_out.sigmoid;
+            sum_error += cur_error * cur_error;
             # only train for the error samples
             if(real_judge != layer_out.sign)
-                layer_out.feedback(eta, (real_judge - layer_out.sigmoid));
+                layer_out.feedback(eta, cur_error);
                 layer_in.each_index {|j|
                     layer_in[j].feedback(eta, layer_out.grad * layer_out.wn[j]);
                 }
@@ -105,8 +108,8 @@ Stage_Cnt.times {|stage|
         }
     }
     # Output the parameter
-    CSV1.printf("%f,%d,%f\n", eta, error_cnt, layer_out.wn[0]);
-    break if(error_cnt == 0);
+    CSV1.printf("%f,%d,%f,%f\n", eta, error_cnt, sum_error, layer_out.wn[0]);
+#    break if(error_cnt == 0);
 }
 
 # show the parameters

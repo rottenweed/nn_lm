@@ -10,6 +10,8 @@ class Perceptron < Neuron
     # Const for sigmoid function (tanh is used).
     A = 1.7159;
     B = 2.0 / 3.0;
+#    A = 1;
+#    B = 100;
 
     # Heaviside function as sign function
     attr_reader(:sign);         # sign value as 0.0 or 1.0
@@ -32,6 +34,11 @@ class Perceptron < Neuron
             @wn[i] += eta_grad * @xn[i];
         }
     end
+end
+
+# pattern division output
+def expect_val(x, y)
+    ((x >= 0) && (y >= 0)) ? 1.0 : -1.0;
 end
 
 BEGIN {
@@ -68,15 +75,21 @@ layer_out.set_w([-1.5, 1.0, 1.0]);
 =end
 
 # count of Layer_In perceptrons
-Layer_In_Count = 2;
-# learning parameter
-Eta1 = 0.01;
-Eta2 = 0.0001;
+Layer_In_Count = 8;
 
 # initial wn value
 layer_in_wn = [[0.0, 0.0, 0.0],
+               [0.0, 0.0, 0.0],
+               [0.0, 0.0, 0.0],
+               [0.0, 0.0, 0.0],
+               [0.0, 0.0, 0.0],
+               [0.0, 0.0, 0.0],
+               [0.0, 0.0, 0.0],
+               [0.0, 0.0, 0.0],
+               [0.0, 0.0, 0.0],
                [0.0, 0.0, 0.0]];
 # input layer: includes some perceptrons
+print("Perceptron count in layer_in : #{Layer_In_Count}\n");
 layer_in = Array.new();
 Layer_In_Count.times {|i|
     layer_in << Perceptron.new(3);
@@ -87,36 +100,61 @@ layer_out = Perceptron.new(Layer_In_Count + 1);
 layer_out_init_wn = [0.0];
 Layer_In_Count.times {|i|
     layer_out_init_wn << rand() - 0.5;
+#    layer_out_init_wn << 1.0;
 }
 layer_out.set_w(layer_out_init_wn);
 print(layer_out_init_wn, "\n");
 
+# gap for the pattern division
+Gap = 0.1;
+# learning parameter
+Eta1 = 0.01;
+Eta2 = 0.001;
+Eta3 = 0.0001;
 # Back Propagation Iteration
-20000.times {|i|
-    x = 2.0 * (rand() - 0.5);
-    y = 2.0 * (rand() - 0.5);
-    xn = [1.0, x, y];
-    yn = [1.0];
-    # Forword Calculation
-    layer_in.each_index {|j|
-        layer_in[j].xn = xn;
-        layer_in[j].cal();
-        yn[j + 1] = layer_in[j].sigmoid;
-    }
-    layer_out.xn = yn;
-    layer_out.cal();
-    # Back Propagration
-    real_judge = ((x >=0) && (y >= 0)) ? 1.0 : -1.0;
-    eta = (i > 10000) ? Eta2 : Eta1;
-    layer_out.feedback(eta, (real_judge - layer_out.sigmoid));
-    layer_in.each_index {|j|
-        layer_in[j].feedback(eta, layer_out.grad * layer_out.wn[j]);
+Stage_Cnt = 10000;
+Stage_Size = 1000;
+# adjust the learning parameter dynamically
+error_cnt = Stage_Size;
+# Back Propagation Iteration
+Stage_Cnt.times {|stage|
+    eta = (error_cnt < Stage_Size / 100) ? Eta3 :
+        (error_cnt < Stage_Size / 10) ? Eta2 : Eta1;
+    error_cnt = 0;
+    sum_error = 0.0;
+    Stage_Size.times {|i|
+        x = 2.0 * (rand() - 0.5);
+        y = 2.0 * (rand() - 0.5);
+#        if(((x < Gap) && (x >= 0) && (y >= 0)) || ((y < Gap) && (y >= 0) && (x >= 0)))
+#            redo;
+#        end
+        xn = [1.0, x, y];
+        yn = [1.0];
+        # Forword Calculation
+        layer_in.each_index {|j|
+            layer_in[j].xn = xn;
+            layer_in[j].cal();
+            yn[j + 1] = layer_in[j].sigmoid;
+        }
+        layer_out.xn = yn;
+        layer_out.cal();
+        # Back Propagration
+        if(expect_val(x, y) != layer_out.sign)
+            error_cnt += 1;
+        end
+        cur_error = expect_val(x, y) - layer_out.sigmoid;
+        sum_error += cur_error * cur_error; 
+        layer_out.feedback(eta, cur_error);
+        layer_in.each_index {|j|
+            layer_in[j].feedback(eta, layer_out.grad * layer_out.wn[j]);
+        }
     }
     # Output the parameter
-    CSV1.printf("%f,%f,%f,%f,%f,%f,%f,%f,%f\n",
-               layer_in[0].wn[0], layer_in[0].wn[1], layer_in[0].wn[2],
-               layer_in[1].wn[0], layer_in[1].wn[1], layer_in[1].wn[2],
-               layer_out.wn[0], layer_out.wn[1], layer_out.wn[2]);
+    CSV1.printf("%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n",
+                error_cnt, sum_error / Stage_Size, eta,
+                layer_in[0].wn[0], layer_in[0].wn[1], layer_in[0].wn[2],
+                layer_in[1].wn[0], layer_in[1].wn[1], layer_in[1].wn[2],
+                layer_out.wn[0], layer_out.wn[1], layer_out.wn[2]);
 }
 
 # ideal wm value
@@ -128,6 +166,7 @@ layer_out.set_w([-1.5, 1.0, 1.0]);
 
 # check the recognition
 # show the parameters
+print("last wn parameters:\n");
 layer_in.each {|neuron|
     print(neuron.wn, "\n");
 }
@@ -135,9 +174,12 @@ print(layer_out.wn, "\n");
 
 right_cnt = 0;
 error_cnt = 0;
-1000.times {|i|
+10000.times {|i|
     x = 2.0 * (rand() - 0.5);
     y = 2.0 * (rand() - 0.5);
+#    if(((x < Gap) && (x >= 0) && (y >= 0)) || ((y < Gap) && (y >= 0) && (x >= 0)))
+#        redo;
+#    end
     xn = [1.0, x, y];
     yn = [1.0];
     layer_in.each_index {|j|
@@ -147,8 +189,7 @@ error_cnt = 0;
     }
     layer_out.xn = yn;
     layer_out.cal();
-    real_judge = ((x >=0) && (y >= 0)) ? 1.0 : -1.0;
-    if(real_judge == layer_out.sign)
+    if(expect_val(x, y) == layer_out.sign)
         right_cnt += 1;
     else
         error_cnt += 1;
