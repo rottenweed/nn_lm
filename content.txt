@@ -44,3 +44,8 @@ by Simon Haykin
     wn值不稳定，不会趋向某个稳定值。
     即使是对分离距离=-6.5，在训练次数很大时，增多训练次数，仍可以继续降低错误率。
     仅对sign判断错误的采样进行训练，错误率略有升高。
+
+5   Core function and Radial-base function network
+    5.0 Quadrant I
+    用简单的sign对x和y进行转换，然后用一个感知器进行模式识别。
+    迅速实现无错误的理想识别：sign(x) + sign(y) - 1

@@ -2,20 +2,22 @@
 
 # test for quadrant I after coordinary exchangement
 
-# pattern division output
-def expect_val(x, y)
-    ((x >= 0) && (y >= 0)) ? 1.0 : -1.0;
-end
-
 BEGIN {
     print("Test for quadrant after coordinate exchangement.\n");
+
+    # pattern division output
+    def expect_val(x, y)
+        ((x >= 0) && (y >= 0)) ? 1.0 : -1.0;
+    end
+
+    require('./neuron.rb');
 }
 
-require('./neuron.rb');
 
 # the function is similiar to logical AND
 and_check = Neuron::Perceptron.new(3);
 print(and_check.class, "\n");
+CSV = File.open("quadrant.csv", "w");
 
 # learning parameter
 Eta1 = 0.01;
@@ -23,7 +25,7 @@ Eta2 = 0.001;
 Eta3 = 0.0001;
 # Back Propagation Iteration
 Stage_Cnt = 10;
-Stage_Size = 10;
+Stage_Size = 100;
 # adjust the learning parameter dynamically
 error_cnt = Stage_Size;
 # Back Propagation Iteration
@@ -47,9 +49,12 @@ Stage_Cnt.times {|stage|
         cur_error = expect_val(xn[1], xn[2]) - and_check.sign;
         sum_error += cur_error * cur_error; 
         and_check.feedback(eta, cur_error);
+        CSV.print("#{and_check.wn[0]},#{and_check.wn[1]},#{and_check.wn[2]}\n");
     }
     print("Error cnt = ", error_cnt, "\n");
 }
+
+CSV.close;
 
 END {
     print("Program end.\n");
