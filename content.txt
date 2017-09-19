@@ -48,4 +48,5 @@ by Simon Haykin
 5   Core function and Radial-base function network
     5.0 Quadrant I
     用简单的sign对x和y进行转换，然后用一个感知器进行模式识别。
-    迅速实现无错误的理想识别：sign(x) + sign(y) - 1
+    迅速实现无错误的理想识别，近似为：sign(x) + sign(y) - 1
+    5.1 使用编码器的K-均值聚类
