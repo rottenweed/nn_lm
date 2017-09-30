@@ -58,7 +58,8 @@ OptCNT.times {|i|
         set_sel = 0;
         # select the nearest set core
         1.upto(SetCnt - 1) {|j| set_sel = j if(dis[j] < dis[set_sel]);}
-    set_point[set_sel] << point_samples[k];
+        # add the point to the nearset set
+        set_point[set_sel] << point_samples[k];
     }
 }
 
