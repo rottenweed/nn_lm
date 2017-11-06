@@ -17,7 +17,7 @@ puts("Start to train the neuron network...");
 # numbers of the point sets
 SetCnt = 20;
 # iteration times in K-mean
-OptCnt = 10;
+OptCnt = 1;
 # point count
 PointTrainCnt = 6;
 
@@ -30,4 +30,27 @@ train_samples = [];
     train_samples << [dot[0][0], dot[0][1], i % SetCnt];
     train_samples << [dot[1][0], dot[1][1], i % SetCnt];
 }
-print train_samples
+
+# Sets optimize cycle
+set_sum = [];
+set_avg = [];
+OptCnt.times {|i|
+    # calculation the average vector of the set (for Min||x-avg||)
+    # initiate the sets at first
+    SetCnt.times {|j|
+        set_sum[j] = [0.0, 0.0, 0]; # [sum_x, sum_y, count]
+        set_avg[j] = [0.0, 0.0];
+    }
+    train_samples.each {|sample|
+        set_sum[sample[2]][0] += sample[0];
+        set_sum[sample[2]][1] += sample[1];
+        set_sum[sample[2]][2] += 1;
+    }
+    SetCnt.times {|j|
+        if(set_sum[j][2] != 0)
+            set_avg[j][0] = set_sum[j][0] / set_sum[j][2];
+            set_avg[j][1] = set_sum[j][1] / set_sum[j][2];
+        end
+    }
+}
+print set_avg
