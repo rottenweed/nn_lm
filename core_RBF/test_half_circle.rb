@@ -3,6 +3,25 @@
 # 1. Use K-mean iteration-down to divide samples into sets.
 # 2. Use core-base functions as middle layer, and RLS(Recursive Least Square) in the output layer.
 
+# Use Matrix lib
+require "matrix"
+# add method []= to class Matrix.
+# modify an assigned element.
+class Matrix
+    def []=(i, j, x)
+        @rows[i][j] = x;
+    end
+end
+
+# add method []= to class Vector.
+# modify an assigned element.
+class Vector
+    def []=(i, x)
+        @elements[i] = x;
+    end
+end
+
+# core function by Gauss
 def phi_ij(omicron, core, point)
     dis2 = (core[0] - point[0]) ** 2 + (core[1] - point[1]) ** 2;
     Math.exp(dis2 / (-2 * omicron ** 2));
@@ -117,6 +136,10 @@ omicron = Math.sqrt(d2max) / Math.sqrt(2 * SetCnt);
 # Train step II: RLS for w(n).
 # middle-layer output
 phi = Array.new(SetCnt, 0.0);
+# parameter for matrix initial value
+LAMBDA = 0.01;
+# create R(0)
+r_last = Matrix.scalar(SetCnt, 1.0 / LAMBDA);
 #PointTrainCnt.times {|i|
 1.times {|i|
     SetCnt.times {|j|
