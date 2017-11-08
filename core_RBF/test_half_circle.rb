@@ -3,23 +3,7 @@
 # 1. Use K-mean iteration-down to divide samples into sets.
 # 2. Use core-base functions as middle layer, and RLS(Recursive Least Square) in the output layer.
 
-# Use Matrix lib
-require "matrix"
-# add method []= to class Matrix.
-# modify an assigned element.
-class Matrix
-    def []=(i, j, x)
-        @rows[i][j] = x;
-    end
-end
-
-# add method []= to class Vector.
-# modify an assigned element.
-class Vector
-    def []=(i, x)
-        @elements[i] = x;
-    end
-end
+require 'matrix'
 
 # core function by Gauss
 def phi_ij(omicron, core, point)
@@ -34,20 +18,22 @@ require("../test_sample/two_half_circle.rb");
 # circle parameter
 CIRCLE_R = 10.0;
 CIRCLE_WIDTH = 6.0;
-CIRCLE_DIS = -1.0;
+CIRCLE_DIS = -6.0;
 
 puts("Start to train the neuron network...");
 # Train step I: K-mean iteration down.
 # numbers of the point sets
 SetCnt = 20;
 # iteration times in K-mean
-OptCnt = 10;
+OptCnt = 100;
 # iteration limit
-Limit_avg_delta = 0.1;
+Limit_avg_delta = 0.001;
 # point count
 PointTrainCnt = 1000;
 CSV1 = File.open("set_avg.csv", "w");
 CSV2 = File.open("set_avg_delta.csv", "w");
+CSV3 = File.open("wn.csv", "w");
+CSV4 = File.open("err_dot.csv", "w");
 
 # initiate the samples for train process.
 # divide the samples to sets randomly.
@@ -64,13 +50,15 @@ set_sum = [];
 set_avg = [];
 set_avg_delta = [];
 square_sum_of_avg_delta = SetCnt * Limit_avg_delta + 1;
+opt_times = 0;
 # initiate the sets at first
 SetCnt.times {|i|
     set_sum << [0.0, 0.0, 0]; # [sum_x, sum_y, count]
     set_avg << [0.0, 0.0];
     set_avg_delta << [0.0, 0.0];
 }
-while(square_sum_of_avg_delta / SetCnt > Limit_avg_delta) 
+# stop when the sets is stable
+while((square_sum_of_avg_delta / SetCnt > Limit_avg_delta) && (opt_times < OptCnt))
     # calculation the average vector of the set (for Min||x-avg||)
     # clear the sum and count
     SetCnt.times {|i|
@@ -118,7 +106,12 @@ while(square_sum_of_avg_delta / SetCnt > Limit_avg_delta)
         # add the sample to the nearest set
         sample[2] = set_sel;
     }
+    opt_times += 1;
 end
+print("K_mean iteration times: #{opt_times}\n");
+SetCnt.times {|i|
+    CSV1.print(set_avg[i][0], ",", set_avg[i][1], "\n");
+}
 CSV1.close;
 CSV2.close;
 
@@ -132,18 +125,55 @@ SetCnt.times {|i|
     }
 }
 omicron = Math.sqrt(d2max) / Math.sqrt(2 * SetCnt);
+print("Omicron value: #{omicron}\n");
 
 # Train step II: RLS for w(n).
 # middle-layer output
-phi = Array.new(SetCnt, 0.0);
 # parameter for matrix initial value
 LAMBDA = 0.01;
-# create R(0)
-r_last = Matrix.scalar(SetCnt, 1.0 / LAMBDA);
-#PointTrainCnt.times {|i|
-1.times {|i|
-    SetCnt.times {|j|
-        phi[j] = phi_ij(omicron, set_avg[j], train_samples[i]);
+# create R(0) = lambda * I, P(0) = 1/R(n) = I / lambda
+p_last = Matrix.scalar(SetCnt, 1.0 / LAMBDA);
+# create W(0) = [all 0]T
+w_last = Matrix.build(SetCnt, 1) {0.0};
+PointTrainCnt.times {|i|
+    # points is generated as "up, down, up, down, ..."
+    d_n = (i % 2 == 0) ? 1.0 : 0.0;
+    # x(n) after coordinate exchange
+    phi_n = Matrix.build(SetCnt, 1) {|row, col|
+        phi_ij(omicron, set_avg[row], train_samples[i]);
+    }
+    y_n = (phi_n.t * w_last)[0, 0];
+    a_n = d_n - y_n;
+    p_n = p_last - p_last * phi_n * phi_n.t * p_last / ( 1 + (phi_n.t * p_last * phi_n)[0, 0]);
+    g_n = p_n * phi_n;
+    w_n = w_last + g_n * a_n;
+    p_last = p_n;
+    w_last = w_n;
+    CSV3.print(a_n, ",", w_n[0, 0], "\n");
+}
+w_last.each {|w| CSV3.print(",", w);}
+CSV3.close;
+# Train end.
+
+# test the neuron network
+print("Start to test the neuron network...\n");
+TestCount = 10000;
+err_cnt = 0;
+(TestCount / 2).times {
+    dot = random_dot_pair_half_circle(CIRCLE_R, CIRCLE_WIDTH, CIRCLE_DIS);
+    2.times {|i|
+        phi_n = Matrix.build(SetCnt, 1) {|row, col|
+            phi_ij(omicron, set_avg[row], dot[i]);
+        }
+        val = (phi_n.t * w_last)[0, 0];
+        y = (val > 0.5) ? 1.0 : 0.0;
+        d_n = (i == 0) ? 1.0 : 0.0;
+        if(y != d_n)
+            err_cnt += 1;
+            CSV4.print(dot[i][0], ",", dot[i][1], "\n");
+        end
     }
 }
-print phi;
+CSV4.close;
+print("Error judgement count: #{err_cnt}\n");
+print("Error percent: #{err_cnt * 100.0 / TestCount}\%\n");
