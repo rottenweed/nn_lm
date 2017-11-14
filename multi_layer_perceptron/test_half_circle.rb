@@ -63,7 +63,7 @@ require("../test_sample/two_half_circle.rb");
 # circle parameter
 CIRCLE_R = 10.0;
 CIRCLE_WIDTH = 6.0;
-CIRCLE_DIS = -6.5;
+CIRCLE_DIS = -6.0;
 
 # learning parameter
 Eta1 = 0.01;

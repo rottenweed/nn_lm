@@ -19,13 +19,14 @@ def create_dot(w)
     return x, y;
 end
 
-# generate a pair of random dots
-# change the dot to assigned two half-cirlce areas
-# all the parameters and the return values are Float/Rational
-# r: circle center line R
-# w: circle width
-# d: lower half_circle distance
-# return as: [[xp, yp], [xn, yn]]
+# generate a pair of random dots.
+# change the dot to assigned two half-cirlce areas.
+# all the parameters and the return values are Float/Rational.
+# r: circle center line R.
+# w: circle width.
+# d: lower half_circle distance.
+# return as: [[xp, yp], [xn, yn]].
+# If d**2 < (r - w/2)**2 - (w/2)**2, half-circles are seperated.
 def random_dot_pair_half_circle(r, w, d)
     dot_pos_p = create_dot((w * 1.0) / r);
     # upper half
