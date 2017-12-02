@@ -12,13 +12,14 @@ class Matrix
 end
 
 print("Support Vector Machine for 3 points on x-y plane.\n");
-# the coordinates of the 3 points
-X = [[-1.0, 1.0], [0.0, -2.0], [1.0, 1.0]];
-# the d values of the 3 points
-D = [1.0, -1.0, 1.0];
 
 Dimension = 2;  # dimension of w and X
-PointCnt = 3;   # count of support vectors
+PointCnt = 4;   # count of support vectors
+# the coordinates of the 3 points
+X = [[-1.0, 1.0], [0.0, -2.0], [1.0, 1.0], [5.0, -2.0]];
+# the d values of the 3 points
+D = [1.0, -1.0, 1.0, -1.0];
+
 # parameter matrix for minimum equation
 # variables as [w0, w1, b, a1, a2, a3]
 var_ratio = Matrix.build(Dimension + PointCnt + 1, Dimension + PointCnt + 1) {0.0};
@@ -47,6 +48,8 @@ PointCnt.times {|i|
     value[Dimension + 1 + i, 0] = D[i];
 }
 
+print var_ratio, "\n"
+print "matrix rank: #{var_ratio.rank}\n"
 result = Matrix.build(Dimension + PointCnt + 1, 1) {0.0};
 result = var_ratio.inv * value;
 print("wn, b, an:\n", result, "\n");
