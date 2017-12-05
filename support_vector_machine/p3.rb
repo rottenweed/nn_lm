@@ -16,7 +16,7 @@ print("Support Vector Machine for 3 points on x-y plane.\n");
 Dimension = 2;  # dimension of w and X
 PointCnt = 3;   # count of support vectors
 # the coordinates of the 3 points
-X = [[-1.0, 0.0], [-1.0, -2.0], [0.0, 1.0], [1.0, 0.0]];
+X = [[-1.0, 1.0], [-1.0, -1.0], [0.0, 2.0]]#, [0.0, 0.0]];
 # the d values of the 3 points
 D = [1.0, -1.0, 1.0, -1.0];
 
