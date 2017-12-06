@@ -12,15 +12,16 @@ class Matrix
     end
 end
 
+# Dual problem, antithetic equation.
 print("Support Vector Machine for points on x-y plane.\n");
-print("Use antithetic algorithm & sum(a(i)d(i)) = 0.\n");
+print("Use dual-problem algorithm & sum(a(i)d(i)) = 0.\n");
 
 Dimension = 2;  # dimension of w and X
 PointCnt = 3;   # count of vectors
 # the coordinates of the 3 points
-X = [[-1.0, 0.0], [-1.0, -2.0], [0.0, 1.0], [1.0, 0.0]];
+X = [[-1.0, 0.0], [0.0, -2.0], [-2.0, 0.0], [3.0, 0.0]];
 # the d values of the points
-D = [1.0, -1.0, 1.0, -1.0];
+D = [1.0, -1.0, 1.0, 1.0];
 
 # Q(a) parameter matrix for maximum equation
 # variables as [a(n)]
