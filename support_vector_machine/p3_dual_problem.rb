@@ -48,9 +48,10 @@ value[PointCnt, 0] = 0.0;
 
 print var_ratio, "\n"
 print "matrix rank: #{var_ratio.rank}\n"
+raise "\nParameter matrix is not normal. rank(#{var_ratio.rank}) < stage(#{PointCnt + 1})\n" if(var_ratio.rank < PointCnt + 1);
 an = Matrix.build(PointCnt, 1) {0.0};
 an = var_ratio.inv * value;
-print("an: #{an}\n");
+print("[an, lambda]: #{an}\n");
 
 wn = Array.new(Dimension, 0.0);
 Dimension.times {|i|
