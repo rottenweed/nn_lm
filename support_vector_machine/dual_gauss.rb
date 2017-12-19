@@ -102,9 +102,10 @@ pointCnt.times {|i|
     a_X << [];    # add a new line
     print("Point #{i}: ");
     data_point = read_float(gets(), 3);
-    a_X[i] << data_point[1];
-    a_X[i] << data_point[2];
-    a_D << data_point[3];
+    Dimension.times {|k|
+        a_X[i] << data_point[k + 1];
+    }
+    a_D << data_point[Dimension + 1];
 }
 # Q(a) parameter matrix for maximum equation
 # variables as [a(n)]
@@ -138,4 +139,9 @@ print("rank = #{rank}\n");
 (pointCnt + 1).times {|i|
     print("#{var_ratio.row(i)} = #{value[i, 0]}, \n");
 }
+
+if(rank == pointCnt + 1)    # full rank
+    a_solution = var_ratio.inv * value;
+    print(a_solution);
+end
 
