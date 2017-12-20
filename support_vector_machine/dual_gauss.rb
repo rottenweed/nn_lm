@@ -142,6 +142,21 @@ print("rank = #{rank}\n");
 
 if(rank == pointCnt + 1)    # full rank
     a_solution = var_ratio.inv * value;
-    print(a_solution);
+    print(a_solution, "\n");
+else
+    rank.upto(pointCnt) {|i|
+        if(value[i, 0].abs > ZERO_LIMIT)
+            printf("No resolution.\n");
+            value = var_ratio.t * value;
+            var_ratio = var_ratio.t * var_ratio;
+            print("Make least mean square\n");
+            rank = Gause_elimination(var_ratio, value, pointCnt + 1, pointCnt + 1);
+            print("rank = #{rank}\n");
+            (pointCnt + 1).times {|i|
+                print("#{var_ratio.row(i)} = #{value[i, 0]}, \n");
+            }
+            break;
+        end
+    }
 end
 
