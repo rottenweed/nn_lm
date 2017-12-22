@@ -142,8 +142,30 @@ print("rank = #{rank}\n");
 
 if(rank == pointCnt + 1)    # full rank
     a_solution = var_ratio.inv * value;
-    print(a_solution, "\n");
+    print("a[] = #{a_solution}\n");
+    # Calculate [w..., b]
+    wn = Array.new(Dimension, 0.0);
+    Dimension.times {|i|
+        pointCnt.times {|j|
+            wn[i] += a_solution[j, 0] * a_D[j] * a_X[j][i];
+        }
+    }
+    print("wn: #{wn}\n");
+    b = 0;
+    cnt_support_vector = 0;
+    pointCnt.times {|i|
+        if(a_solution[i, 0] != 0)  # support vector
+            cnt_support_vector += 1;
+            b += a_D[i];
+            Dimension.times {|j|
+                b -= wn[j] * a_X[i][j];
+            }
+        end
+    }
+    b /= cnt_support_vector;
+    print("b: #{b}\n");
 else
+    lms_process = false;
     rank.upto(pointCnt) {|i|
         if(value[i, 0].abs > ZERO_LIMIT)
             printf("No resolution.\n");
@@ -152,11 +174,14 @@ else
             print("Make least mean square\n");
             rank = Gause_elimination(var_ratio, value, pointCnt + 1, pointCnt + 1);
             print("rank = #{rank}\n");
-            (pointCnt + 1).times {|i|
-                print("#{var_ratio.row(i)} = #{value[i, 0]}, \n");
-            }
+            lms_process = true;
             break;
         end
     }
+    if(lms_process == true)
+        (pointCnt + 1).times {|i|
+            print("#{var_ratio.row(i)} = #{value[i, 0]}, \n");
+        }
+    end
 end
 
