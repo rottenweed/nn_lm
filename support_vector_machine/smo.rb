@@ -59,9 +59,11 @@ module SMO
         else
             @@a[d_neg_last] += sum;
         end
+        @@point_cnt;
     end
 
     def self.iterate()
+        cycle = 0;
         delta = 1.0;
         n1 = 0;
         while((n1 != 0) || (delta > @@delta_limit))
@@ -103,9 +105,16 @@ module SMO
             @@a[n2] = a2;
             # to next cycle
             n1 += 1;
-            n1 = 0 if(n1 == @@point_cnt);
-            print "#{@@a}, #{delta}\n" if(n1 == 0);
+            if(n1 == @@point_cnt)
+                n1 = 0;
+                cycle += 1;
+            end
         end
+        cycle;
+    end
+
+    def self.result()
+        @@a;
     end
 end
 
