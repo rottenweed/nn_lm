@@ -5,10 +5,15 @@
 # 3. Use SVM algorithm.
 
 require 'matrix'
+require './smo'
 
+DIMENSION_CNT = 2;
 # core function by Gauss
 def phi_ij(omicron, core, point)
-    dis2 = (core[0] - point[0]) ** 2 + (core[1] - point[1]) ** 2;
+    dis2 = 0.0;
+    DIMENSION_CNT.times {|i|
+        dis2 += (core[i] - point[i]) ** 2;
+    }
     Math.exp(dis2 / (-2 * omicron ** 2));
 end
 
@@ -30,10 +35,10 @@ OptCnt = 100;
 # iteration limit
 Limit_avg_delta = 0.001;
 # point count
-PointTrainCnt = 1000;
+PointTrainCnt = 300;
 CSV1 = File.open("set_avg.csv", "w");
 CSV2 = File.open("set_avg_delta.csv", "w");
-CSV3 = File.open("wn.csv", "w");
+CSV3 = File.open("vector.csv", "w");
 CSV4 = File.open("err_dot.csv", "w");
 
 # initiate the samples for train process.
@@ -65,7 +70,7 @@ while((square_sum_of_avg_delta / SetCnt > Limit_avg_delta) && (opt_times < OptCn
     SetCnt.times {|i|
         set_sum[i] = [0.0, 0.0, 0]; # [sum_x, sum_y, count]
     }
-    # add the sample to the corresponding set
+    # add every sample to the corresponding set
     train_samples.each {|sample|
         set_sum[sample[2]][0] += sample[0];
         set_sum[sample[2]][1] += sample[1];
@@ -128,53 +133,93 @@ SetCnt.times {|i|
 omicron = Math.sqrt(d2max) / Math.sqrt(2 * SetCnt);
 print("Omicron value: #{omicron}\n");
 
-# Train step II: RLS for w(n).
-# middle-layer output
-# parameter for matrix initial value
-LAMBDA = 0.01;
-# create R(0) = lambda * I, P(0) = 1/R(n) = I / lambda
-p_last = Matrix.scalar(SetCnt, 1.0 / LAMBDA);
-# create W(0) = [all 0]T
-w_last = Matrix.build(SetCnt, 1) {0.0};
+# Train step II: SVM by SMO
+# middle-layer output: coordinate exchange to RBF
+# coordinates of all the points, dimension count as SetCnt
+x = [];
+# value of all the points
+d = [];
 PointTrainCnt.times {|i|
     # points is generated as "up, down, up, down, ..."
-    d_n = (i % 2 == 0) ? 1.0 : 0.0;
-    # x(n) after coordinate exchange
-    phi_n = Matrix.build(SetCnt, 1) {|row, col|
-        phi_ij(omicron, set_avg[row], train_samples[i]);
+    d[i] = (i % 2 == 0) ? 1 : -1;
+    # x[i] after coordinate exchange
+    temp = [];
+    SetCnt.times {|dim|
+        temp << phi_ij(omicron, set_avg[dim], train_samples[i]);
     }
-    y_n = (phi_n.t * w_last)[0, 0];
-    a_n = d_n - y_n;
-    p_n = p_last - p_last * phi_n * phi_n.t * p_last / ( 1 + (phi_n.t * p_last * phi_n)[0, 0]);
-    g_n = p_n * phi_n;
-    w_n = w_last + g_n * a_n;
-    p_last = p_n;
-    w_last = w_n;
-    CSV3.print(a_n, ",", w_n[0, 0], "\n");
+    x << temp;
 }
-w_last.each {|w| CSV3.print(",", w);}
+# setup kernal matrix
+k = Matrix.build(PointTrainCnt, PointTrainCnt) {|i, j|
+    k_ij = 0.0;
+    SetCnt.times {|m|
+        k_ij += x[i][m] * x[j][m];
+    }
+    k_ij;
+};
+
+# use SMO algorithm
+print "Point count = #{SMO.init_point(x, d, k)}\n";
+cycle = SMO.iterate;
+print "Iterate times: #{cycle}\n";
+# output value of a
+a = SMO.result;
+# generate wn and b
+wn = Array.new(SetCnt, 0.0);
+b = 0.0;
+# count of the support vectors
+sv_cnt = 0;
+# calculate wn
+PointTrainCnt.times {|i|
+    if(a[i] > 1E-4)
+        sv_cnt += 1;
+        CSV3.print("#{train_samples[i][0]},#{train_samples[i][1]},#{d[i]},#{a[i]}\n");
+        SetCnt.times {|j|
+            wn[j] += a[i] * d[i] * x[i][j];
+        }
+    else
+        a[i] = 0.0;
+    end
+}
+# calculate b as average
+PointTrainCnt.times {|i|
+    if(a[i] > 1E-4)
+        b += 1;
+        SetCnt.times {|j|
+            b += wn[j] * x[i][j];
+        }
+    end
+}
+b /= sv_cnt;
+
 CSV3.close;
 # Train end.
 
 # test the neuron network
 print("Start to test the neuron network...\n");
-TestCount = 10000;
+TestCount = 1000;
 err_cnt = 0;
 (TestCount / 2).times {
     dot = random_dot_pair_half_circle(CIRCLE_R, CIRCLE_WIDTH, CIRCLE_DIS);
     2.times {|i|
-        phi_n = Matrix.build(SetCnt, 1) {|row, col|
-            phi_ij(omicron, set_avg[row], dot[i]);
+        # coordinate exchange
+        x = [];
+        SetCnt.times {|dim|
+            x << phi_ij(omicron, set_avg[dim], dot[i]);
         }
-        val = (phi_n.t * w_last)[0, 0];
-        y = (val > 0.5) ? 1.0 : 0.0;
-        d_n = (i == 0) ? 1.0 : 0.0;
+        val = b;
+        SetCnt.times {|dim|
+            val += wn[dim] * x[dim];
+        }
+        y = (val >= 0.0) ? 1 : -1;
+        d_n = (i == 0) ? 1 : -1;
         if(y != d_n)
             err_cnt += 1;
-            CSV4.print(dot[i][0], ",", dot[i][1], "\n");
+            CSV4.print("#{val},#{d_n},#{dot[i][0]},#{dot[i][1]}\n");
         end
     }
 }
 CSV4.close;
 print("Error judgement count: #{err_cnt}\n");
 print("Error percent: #{err_cnt * 100.0 / TestCount}\%\n");
+

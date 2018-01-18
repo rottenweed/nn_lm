@@ -15,8 +15,8 @@ module SMO
     @@x = [];
     # D value
     @@d = [];
-    # kernel
-    @@k = Matrix.build(2, 2);
+    # kernel matrix[@@point_cnt, @@point_cnt]
+    # @@k
     # Lagrange multiple number
     @@a = [];
 
