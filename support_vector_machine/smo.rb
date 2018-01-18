@@ -6,13 +6,10 @@ require 'matrix'
 module SMO
     # parameters
     @@max_limit_c = 1E8;
-    @@dimension = 2;
     @@delta_limit = 1E-6;
 
     # variables
     @@point_cnt = 0;
-    # position X
-    @@x = [];
     # D value
     @@d = [];
     # kernel matrix[@@point_cnt, @@point_cnt]
@@ -25,12 +22,11 @@ module SMO
     end
 
     def self.show_parameter
-        return @@max_limit_c, @@dimension, @@delta_limit;
+        return @@max_limit_c, @@delta_limit;
     end
 
-    def self.init_point(x, d, k)
+    def self.init_point(d, k)
         # save the object pointer
-        @@x = x;
         @@d = d;
         @@k = k;
         @@point_cnt = d.size;

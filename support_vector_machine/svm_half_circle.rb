@@ -24,7 +24,7 @@ require("../test_sample/two_half_circle.rb");
 # circle parameter
 CIRCLE_R = 10.0;
 CIRCLE_WIDTH = 6.0;
-CIRCLE_DIS = -6.0;
+CIRCLE_DIS = -5.0;
 
 puts("Start to train the neuron network...");
 # Train step I: K-mean iteration down.
@@ -159,7 +159,8 @@ k = Matrix.build(PointTrainCnt, PointTrainCnt) {|i, j|
 };
 
 # use SMO algorithm
-print "Point count = #{SMO.init_point(x, d, k)}\n";
+point_cnt = SMO.init_point(d, k);
+print "Point count = #{point_cnt}\n";
 cycle = SMO.iterate;
 print "Iterate times: #{cycle}\n";
 # output value of a
