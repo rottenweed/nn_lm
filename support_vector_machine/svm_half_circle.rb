@@ -24,7 +24,7 @@ require("../test_sample/two_half_circle.rb");
 # circle parameter
 CIRCLE_R = 10.0;
 CIRCLE_WIDTH = 6.0;
-CIRCLE_DIS = -5.0;
+CIRCLE_DIS = -6.5;
 
 puts("Start to train the neuron network...");
 # Train step I: K-mean iteration down.
@@ -172,26 +172,24 @@ b = 0.0;
 sv_cnt = 0;
 # calculate wn
 PointTrainCnt.times {|i|
+    SetCnt.times {|j|
+        wn[j] += a[i] * d[i] * x[i][j];
+    }
     if(a[i] > 1E-4)
         sv_cnt += 1;
         CSV3.print("#{train_samples[i][0]},#{train_samples[i][1]},#{d[i]},#{a[i]}\n");
-        SetCnt.times {|j|
-            wn[j] += a[i] * d[i] * x[i][j];
-        }
-    else
-        a[i] = 0.0;
     end
 }
 # calculate b as average
+b_div = 0.0;
 PointTrainCnt.times {|i|
-    if(a[i] > 1E-4)
-        b += 1;
-        SetCnt.times {|j|
-            b += wn[j] * x[i][j];
-        }
-    end
+    b += d[i] * a[i];
+    b_div += a[i];
+    SetCnt.times {|j|
+        b -= a[i] * wn[j] * x[i][j];
+    }
 }
-b /= sv_cnt;
+b /= b_div;
 
 CSV3.close;
 # Train end.

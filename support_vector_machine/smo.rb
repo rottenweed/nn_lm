@@ -6,7 +6,7 @@ require 'matrix'
 module SMO
     # parameters
     @@max_limit_c = 1E8;
-    @@delta_limit = 1E-6;
+    @@delta_limit = 1E-8;
 
     # variables
     @@point_cnt = 0;
