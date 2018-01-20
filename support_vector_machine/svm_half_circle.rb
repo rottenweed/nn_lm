@@ -24,7 +24,7 @@ require("../test_sample/two_half_circle.rb");
 # circle parameter
 CIRCLE_R = 10.0;
 CIRCLE_WIDTH = 6.0;
-CIRCLE_DIS = -6.5;
+CIRCLE_DIS = -6.0;
 
 puts("Start to train the neuron network...");
 # Train step I: K-mean iteration down.
