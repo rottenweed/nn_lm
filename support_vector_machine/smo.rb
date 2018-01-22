@@ -6,7 +6,7 @@ require 'matrix'
 module SMO
     # parameters
     @@max_limit_c = 1E8;
-    @@delta_limit = 1E-8;
+    @@delta_limit = 1E-6;
 
     # variables
     @@point_cnt = 0;
@@ -21,15 +21,21 @@ module SMO
         @@max_limit_c = max_limit_c;
     end
 
+    def self.a=(a)
+        @@point_cnt.times {|i|
+            @@a[i] = a[i];
+        }
+    end
+
     def self.show_parameter
         return @@max_limit_c, @@delta_limit;
     end
 
-    def self.init_point(d, k)
+    def self.init_point(point_cnt, d, k)
         # save the object pointer
+        @@point_cnt = point_cnt;
         @@d = d;
         @@k = k;
-        @@point_cnt = d.size;
         # init Lagrange multiple number >= 1.0
         @@a = Array.new(@@point_cnt, 0.0);
         # record last points of +1/-1 d value
@@ -55,6 +61,7 @@ module SMO
         else
             @@a[d_neg_last] += sum;
         end
+        print "#{@@a}\n#{@@d}\n#{@@k}\n";
         @@point_cnt;
     end
 
@@ -105,6 +112,7 @@ module SMO
                 n1 = 0;
                 cycle += 1;
             end
+            print "#{@@a}\n"
         end
         cycle;
     end

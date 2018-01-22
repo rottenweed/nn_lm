@@ -159,7 +159,7 @@ k = Matrix.build(PointTrainCnt, PointTrainCnt) {|i, j|
 };
 
 # use SMO algorithm
-point_cnt = SMO.init_point(d, k);
+point_cnt = SMO.init_point(PointTrainCnt, d, k);
 print "Point count = #{point_cnt}\n";
 cycle = SMO.iterate;
 print "Iterate times: #{cycle}\n";
