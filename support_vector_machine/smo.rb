@@ -7,6 +7,7 @@ module SMO
     # parameters
     @@max_limit_c = 1E8;
     @@delta_limit = 1E-6;
+    @@a_init_value = 0.0;
 
     # variables
     @@point_cnt = 0;
@@ -27,8 +28,12 @@ module SMO
         }
     end
 
+    def self.a_init_value=(a_init_value)
+        @@a_init_value = a_init_value;
+    end
+
     def self.show_parameter
-        return @@max_limit_c, @@delta_limit;
+        return @@max_limit_c, @@delta_limit, @@a_init_value;
     end
 
     def self.init_point(point_cnt, d, k)
@@ -44,7 +49,7 @@ module SMO
         # sum of a[i] * d[i] = 0
         sum = 0.0;
         @@point_cnt.times {|i|
-            @@a[i] = 1.0;
+            @@a[i] = @@a_init_value;
             sum += @@a[i] * @@d[i];
             if(d[i] == 1)
                 d_pos_last = i;
@@ -61,7 +66,7 @@ module SMO
         else
             @@a[d_neg_last] += sum;
         end
-        print "#{@@a}\n#{@@d}\n#{@@k}\n";
+        #  print "#{@@a}\n#{@@d}\n#{@@k}\n";
         @@point_cnt;
     end
 
@@ -112,7 +117,7 @@ module SMO
                 n1 = 0;
                 cycle += 1;
             end
-            print "#{@@a}\n"
+            # print "#{@@a}\n"
         end
         cycle;
     end

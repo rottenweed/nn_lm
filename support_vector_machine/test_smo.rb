@@ -16,9 +16,10 @@ k = Matrix.build(point_cnt, point_cnt) {|i, j|
     k_ij;
 };
 
+#SMO.a_init_value = 0.1;
+print "SMO parameters: #{SMO.show_parameter()}\n";
 print "Point count = #{SMO.init_point(point_cnt, d, k)}\n";
 #SMO.a = [0.25, 0.25, 0.5, 0, 0];
-#SMO.a = [1, 0, 1, 0, 0];
 cycle = SMO.iterate;
 print "Iterate times: #{cycle}\n";
 a = SMO.result;
