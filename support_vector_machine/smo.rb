@@ -72,25 +72,35 @@ module SMO
 
     def self.iterate()
         cycle = 0;
+        step = 1;
         delta = 1.0;
+        delta_last = delta;
         n1 = 0;
-        while((n1 != 0) || (delta > @@delta_limit))
-            n2 = n1 + 1;
+        while((n1 != 0) || (delta > @@delta_limit) || (delta_last > @@delta_limit))
+            n2 = n1 + step;
             n2 -= @@point_cnt if(n2 >= @@point_cnt);
             # clear delta when cycle start
-            delta = 0.0 if(n1 == 0);
+            if(n1 == 0)
+                delta_last = delta;
+                delta = 0.0;
+            end
             aidi_else = 0;
             @@point_cnt.times {|i|
                 if((i != n1) && (i != n2))
                     aidi_else += @@a[i] * @@d[i];
                 end
             }
+            aidi_else = 0 if(aidi_else.abs < 1 / @@max_limit_c);
             if(@@d[n1] * @@d[n2] > 0)
                 a1_min = 0.0;
                 a1_max = - aidi_else * @@d[n1];
-                raise("Error!!! a_max[#{n1}] < 0!") if(a1_max < 0);
+                raise("Error!!! a_max[#{n1}] <= #{-aidi_else * @@d[n1]}!") if(a1_max < 0);
             else
-                a1_min = [0.0, - aidi_else * @@d[n1]].max;
+                if(aidi_else * @@d[n1] < 0)
+                    a1_min = - aidi_else * @@d[n1];
+                else
+                    a1_min = 0.0;
+                end
                 a1_max = @@max_limit_c;
             end
     
@@ -103,12 +113,13 @@ module SMO
                 end
             }
             a1 *= @@d[n1];
+            raise "Error! a1 will be NaN! n1 = #{n1}, n2 = #{n2}" if (@@k[n1, n1] + @@k[n2, n2] - 2 * @@k[n1, n2] < 1 / @@max_limit_c);
             a1 /= @@k[n1, n1] + @@k[n2, n2] - 2 * @@k[n1, n2];
             # a1 value limit
             a1 = a1_min if(a1 < a1_min);
             a1 = a1_max if(a1 > a1_max);
             a2 = -a1 * @@d[n1] * @@d[n2] - aidi_else * @@d[n2];
-            delta = [delta, (@@a[n1] - a1).abs].max;
+            delta = (@@a[n1] - a1).abs if((@@a[n1] - a1).abs > delta);
             @@a[n1] = a1;
             @@a[n2] = a2;
             # to next cycle
@@ -116,8 +127,10 @@ module SMO
             if(n1 == @@point_cnt)
                 n1 = 0;
                 cycle += 1;
+                step += 1;
+                step = 1 if(step == @@point_cnt);
             end
-            # print "#{@@a}\n"
+            #print "#{@@a}\n"
         end
         cycle;
     end
