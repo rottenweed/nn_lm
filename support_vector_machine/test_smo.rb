@@ -6,8 +6,13 @@ require './smo'
 SMO.MAX_LIMIT_C = 1E6;
 point_cnt = 5;
 dimension = 2;
-x = [[-1, 1], [1, 1], [0, -1], [0, 2], [2, -2]];
-d = [1, 1, -1, 1, -1];
+x = [[-1, 1], [0, 2], [1, 1], [0, -1], [2, -2]];
+d = [];
+x.size.times {|i|
+    d[i] = if(x[i][1] >= 0) then 1  # y >= 0
+           else -1;
+    end
+}
 k = Matrix.build(point_cnt, point_cnt) {|i, j|
     k_ij = 0.0;
     dimension.times {|m|
