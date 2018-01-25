@@ -8,7 +8,11 @@ module SMO
     @@max_limit_c = 1E8;
     @@delta_limit = 1E-6;
     @@a_init_value = 0.0;
-
+    # use prime numbers as step between n1 and n2
+    @@step_number = [1, 2, 3, 5, 7, 11, 13, 17, 19, 23, 29,
+                        31, 37, 41, 43, 47, 53, 59, 61, 67, 71,
+                        73, 79, 83, 89, 97];
+    #@@step_number = [1, 2, 3, 5, 8, 13, 21, 34, 55, 89];
     # variables
     @@point_cnt = 0;
     # D value
@@ -72,12 +76,11 @@ module SMO
 
     def self.iterate()
         cycle = 0;
-        step = 1;
-        delta = 1.0;
-        delta_last = delta;
-        while((delta > @@delta_limit) || (delta_last > @@delta_limit))
+        step_index = 0;
+        step = @@step_number[step_index];
+        delta_zero_cnt = 0;
+        while(delta_zero_cnt < 2)
             # clear delta when cycle start
-            delta_last = delta;
             delta = 0.0;
             @@point_cnt.times {|n1|
                 n2 = n1 + step;
@@ -122,8 +125,19 @@ module SMO
                 @@a[n2] = a2;
             }
             cycle += 1;
-            step += 1;
-            step = 1 if(step == @@point_cnt);
+            if(delta < @@delta_limit)
+                delta_zero_cnt += 1;
+            else
+                delta_zero_cnt = 0;
+            end
+            if(step_index == @@step_number.size - 1)
+                step_index = 0;
+            elsif(@@step_number[step_index + 1] >= @@point_cnt)
+                step_index = 0;
+            else
+                step_index += 1;
+            end
+            step = @@step_number[step_index];
             #print "#{@@a}\n"
         end
         cycle;
