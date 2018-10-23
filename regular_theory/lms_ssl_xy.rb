@@ -1,6 +1,7 @@
 #! /usr/bin/ruby -w
 
 print("Test two half circle in Semi-Supervised Learning.\n");
+print("Only use x-y coordinate.\n");
 
 # config samples generator
 require("../test_sample/two_half_circle.rb");
