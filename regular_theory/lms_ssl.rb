@@ -15,8 +15,11 @@ CIRCLE_R = 10.0;
 CIRCLE_WIDTH = 6.0;
 CIRCLE_DIS = 1.0;
 
+# CSV files for internal values
+CSV_core = File.open("core.csv", "w");
+
 # generate points in two half-circles for training
-TRAIN_CNT = 20;
+TRAIN_CNT = 2000;
 SUPERVISE_CNT = 4;
 train_point = []; # point saved as [x, y, val, set_sel]
 (TRAIN_CNT / 2).times {|i|
@@ -41,17 +44,18 @@ TRAIN_CNT.times {|i|
 
 # optimize cycles
 OPTI_TIMES.times {|i|
+#3.times {|i|
     # save the last set_avg results
     # cannot copy the array!
-    SET_CNT.times {|j|
+    set_avg_old.each_index {|j|
         set_avg_old[j][0] = set_avg[j][0];
         set_avg_old[j][1] = set_avg[j][1];
     }
     # calculation the average vector of the set (for Min||x-avg||)
-    set_avg.each {|value|
+    set_avg.map! {|value|
         value = [0.0, 0.0]
     }
-    set_point_cnt.each {|value|
+    set_point_cnt.map! {|value|
         value = 0;
     }
     train_point.each {|sample|
@@ -70,7 +74,6 @@ OPTI_TIMES.times {|i|
         set_avg_delta_sum += (set_avg[j][1] - set_avg_old[j][1]) ** 2;
     }
 
-    print(i, ",", set_avg_delta_sum, "\n");
     break if(set_avg_delta_sum < AVG_DELTA_LIMIT * SET_CNT);
 
     # divide the points to sets
@@ -87,8 +90,20 @@ OPTI_TIMES.times {|i|
 }
 
 # save the core position to CSV
-CSV_core = File.open("core.csv", "w");
 SET_CNT.times {|i|
-    CSV_core.print("#{set_avg[i][0]}, #{set_avg[i][1]}\n");
+    CSV_core.print("#{set_avg[i][0]}, #{set_avg[i][1]}, #{set_point_cnt[i]}\n");
 }
+CSV_core.close();
+
+# calc the omicron value for phi function
+# select the max distance between two set cores
+d2max = 0;
+SET_CNT.times {|i|
+    i.upto(SET_CNT - 1) {|j|
+        temp = (set_avg[i][0] - set_avg[j][0]) ** 2 + (set_avg[i][1] - set_avg[j][1]) ** 2;
+        d2max = temp if(d2max < temp);
+    }
+}
+omicron = Math.sqrt(d2max) / Math.sqrt(2 * SET_CNT);
+print("Omicron value: #{omicron}\n");
 
