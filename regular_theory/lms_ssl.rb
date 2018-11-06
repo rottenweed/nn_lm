@@ -1,5 +1,11 @@
 #! /usr/bin/ruby -w
 
+# core function by Gauss
+def phi_ij(omicron, core, point)
+    dis2 = (core[0] - point[0]) ** 2 + (core[1] - point[1]) ** 2;
+    Math.exp(dis2 / (-2 * omicron ** 2));
+end
+
 ZERO_LIMIT = 1e-8;
 def val_f(x)
     # continuous version: Math.tanh(x)
@@ -19,7 +25,7 @@ CIRCLE_DIS = 1.0;
 CSV_core = File.open("core.csv", "w");
 
 # generate points in two half-circles for training
-TRAIN_CNT = 2000;
+TRAIN_CNT = 1000;
 SUPERVISE_CNT = 4;
 train_point = []; # point saved as [x, y, val, set_sel]
 (TRAIN_CNT / 2).times {|i|
@@ -107,3 +113,21 @@ SET_CNT.times {|i|
 omicron = Math.sqrt(d2max) / Math.sqrt(2 * SET_CNT);
 print("Omicron value: #{omicron}\n");
 
+# exchange the dimension space
+# each sample has SET_CNT position variables
+samples = Array.new(TRAIN_CNT) {|xn| Array.new(SET_CNT, 0.0)};
+
+TRAIN_CNT.times {|i|
+    SET_CNT.times {|j|
+        samples[i][j] = phi_ij(omicron, set_avg[j], train_point[i]);
+    }
+}
+
+require('matrix');
+matrix_Gram = Matrix.build(TRAIN_CNT, TRAIN_CNT) {|i, j|
+    sum = 0.0;
+    SET_CNT.times {|k|
+        sum += samples[i][k] * samples[j][k];
+    }
+    sum;
+}
