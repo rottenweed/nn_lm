@@ -131,3 +131,36 @@ matrix_Gram = Matrix.build(TRAIN_CNT, TRAIN_CNT) {|i, j|
     }
     sum;
 }
+EPSILON = 0.5;
+SIGMA = 1.0;
+# create neighbour matrix
+matrix_W = Matrix.build(TRAIN_CNT, TRAIN_CNT) {|i, j|
+    sum = 0.0;
+    SET_CNT.times {|k|
+        sum += (samples[i][k] - samples[j][k]) ** 2;
+    }
+    if(sum < EPSILON ** 2)
+        Math.exp(sum / (-2 * SIGMA ** 2));
+    else
+        0.0;
+    end
+}
+matrix_T = Matrix.build(TRAIN_CNT, TRAIN_CNT) {|i, j|
+    if(i == j)
+        sum = 0.0;
+        TRAIN_CNT.times {|k|
+            sum += matrix_W[i, k];
+        }
+        sum;
+    else
+        0;
+    end
+}
+# create Lagrange matrix
+matrix_L = Matrix.build(TRAIN_CNT, TRAIN_CNT) {|i, j|
+    matrix_T[i, j] - matrix_W[i, j];
+}
+
+# regular parameters.
+LAMBDA_A = 0.001; # external
+LAMBDA_I = 0.0; # internal
