@@ -135,12 +135,16 @@ EPSILON = 0.5;
 SIGMA = 1.0;
 # create neighbour matrix
 matrix_W = Matrix.build(TRAIN_CNT, TRAIN_CNT) {|i, j|
-    sum = 0.0;
-    SET_CNT.times {|k|
-        sum += (samples[i][k] - samples[j][k]) ** 2;
-    }
-    if(sum < EPSILON ** 2)
-        Math.exp(sum / (-2 * SIGMA ** 2));
+    if(i != j)
+        sum = 0.0;
+        SET_CNT.times {|k|
+            sum += (samples[i][k] - samples[j][k]) ** 2;
+        }
+        if(sum < EPSILON ** 2)
+            Math.exp(sum / (-2 * SIGMA ** 2));
+        else
+            0.0;
+        end
     else
         0.0;
     end
@@ -153,12 +157,28 @@ matrix_T = Matrix.build(TRAIN_CNT, TRAIN_CNT) {|i, j|
         }
         sum;
     else
-        0;
+        0.0;
     end
 }
 # create Lagrange matrix
 matrix_L = Matrix.build(TRAIN_CNT, TRAIN_CNT) {|i, j|
     matrix_T[i, j] - matrix_W[i, j];
+}
+# expected vector of SUPERVISE_CNT
+matrix_d = Matrix.build(TRAIN_CNT, 1) {|i, j|
+    if(i < SUPERVISE_CNT)
+        train_point[i][2];
+    else
+        0.0;
+    end
+}
+# part of unit matrix
+matrix_I = Matrix.build(TRAIN_CNT, TRAIN_CNT) {|i, j|
+    if((i == j) && (i < SUPERVISE_CNT))
+        1.0;
+    else
+        0.0;
+    end
 }
 
 # regular parameters.
